@@ -181,11 +181,12 @@ make app=node2vec_x4 TARGET=hw all
 
 Please note that the build of each accelerator may take around 15 hours, depending on the server's performance.
 
-To build tests and benchmarks (projects in `app/test/`), replace `${test_name}` with the name of the test. For example:
+To build tests and benchmarks (projects in `app/test/`), replace `app=${app_name}` with `test=${test_name}`, where `${test_name}` the name of the test project. For example:
 
 ```bash
 make test=vcache_test TARGET=hw all 
 ```
+The above make command generate the accelerator of vcache_test unit test of DAC cache.
 
 
 ### Running LightRW
