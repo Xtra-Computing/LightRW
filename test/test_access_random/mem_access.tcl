@@ -1,0 +1,2 @@
+config_interface -m_axi_latency 64
+config_compile -pipeline_style frp

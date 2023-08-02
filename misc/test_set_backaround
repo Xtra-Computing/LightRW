@@ -1,0 +1,8 @@
+window_id=$(xwininfo -root -tree  | grep Sourcing\ Tcl | awk '{print $1}')
+
+echo ${window_id}
+
+xdotool windowactivate ${window_id}
+xdotool windowfocus ${window_id}
+
+xdotool key alt+B

@@ -1,0 +1,355 @@
+#include <ap_axi_sdata.h>
+#include <ap_int.h>
+#include <hls_stream.h>
+
+#include "rw_type.h"
+#include "rng_type.h"
+#include "stream_operation.h"
+
+
+#define STATS_READ_CURR_UPDATE (0)
+#define STATS_READ_CURR_END    (1)
+#define STATS_READ_CURR_END_2  (2)
+#define STATS_CLEAR            (3)
+#define STATS_SAME             (4)
+#define STATS_SMALL            (5)
+#define STATS_LARGE            (6)
+#define STATS_READ_LAST_END    (7)
+
+//#define NEIGHBOR_SET  ((((test_counter++)<<24) | curr_adj_v) | 0x80000000)
+//#define NEIGHBOR_UNSET (((test_counter++)<<24) | curr_adj_v)
+
+#define NEIGHBOR_SET    ((curr_adj_v == 0)?0:2)
+#define NEIGHBOR_UNSET  ((curr_adj_v == 0)?0:4)
+
+
+#define NUM_OF_WEIGHTS (16)
+
+
+extern "C" {
+    void neighbor_mask(     adjacent_stream_t       &curr_adj_in,
+                            weight_stream_t         &last_adj_in,
+                            adjacent_stream_t       &out )
+    {
+#pragma HLS interface ap_ctrl_none port=return
+
+        volatile uint8_t update_state = STATS_READ_CURR_UPDATE;
+
+        adjacent_pkg_t out_pkg;
+        volatile uint32_t         last_adj_v_0;
+        volatile uint32_t         last_adj_v_1;
+        volatile uint32_t         last_adj_v_2;
+        volatile uint32_t         last_adj_v_3;
+        volatile uint32_t         last_adj_v_4;
+        volatile uint32_t         last_adj_v_5;
+        volatile uint32_t         last_adj_v_6;
+        volatile uint32_t         last_adj_v_7;
+        volatile uint32_t         last_adj_v_8;
+        volatile uint32_t         last_adj_v_9;
+        volatile uint32_t         last_adj_v_10;
+        volatile uint32_t         last_adj_v_11;
+        volatile uint32_t         last_adj_v_12;
+        volatile uint32_t         last_adj_v_13;
+        volatile uint32_t         last_adj_v_14;
+        volatile uint32_t         last_adj_v_15;
+
+        volatile uint32_t curr_adj_v;
+        volatile uint8_t last_adj_v_flag  = 0;
+        volatile uint8_t curr_adj_v_flag  = 0;
+
+        volatile uint8_t last_adj_v_end  = 0;
+        volatile uint8_t curr_adj_v_end  = 0;
+
+        volatile uint8_t test_counter = 0;
+
+
+        volatile uint8_t final_current = 0;
+
+        //volatile uint32_t last_adj_v_read;
+        //volatile uint32_t curr_adj_v_read;
+
+free_run: while (1)
+        {
+            if (curr_adj_v_flag == 0)
+            {
+                adjacent_pkg_t curr_adj_pkg;
+                if (curr_adj_in.read_nb(curr_adj_pkg))
+                {
+                    curr_adj_v = curr_adj_pkg.data.ap_member(adjacent_t, v);
+                    curr_adj_v_end = curr_adj_pkg.last;
+                    curr_adj_v_flag = 1;
+                }
+            }
+
+            if (last_adj_v_flag == 0)
+            {
+                weight_pkg_t last_adj_pkg;
+                if (last_adj_in.read_nb(last_adj_pkg))
+                {
+                    last_adj_v_end = last_adj_pkg.last;
+                    last_adj_v_0  = last_adj_pkg.data.ap_member_array(weight_t, data, 0);
+                    last_adj_v_1  = last_adj_pkg.data.ap_member_array(weight_t, data, 1);
+                    last_adj_v_2  = last_adj_pkg.data.ap_member_array(weight_t, data, 2);
+                    last_adj_v_3  = last_adj_pkg.data.ap_member_array(weight_t, data, 3);
+                    last_adj_v_4  = last_adj_pkg.data.ap_member_array(weight_t, data, 4);
+                    last_adj_v_5  = last_adj_pkg.data.ap_member_array(weight_t, data, 5);
+                    last_adj_v_6  = last_adj_pkg.data.ap_member_array(weight_t, data, 6);
+                    last_adj_v_7  = last_adj_pkg.data.ap_member_array(weight_t, data, 7);
+                    last_adj_v_8  = last_adj_pkg.data.ap_member_array(weight_t, data, 8);
+                    last_adj_v_9  = last_adj_pkg.data.ap_member_array(weight_t, data, 9);
+                    last_adj_v_10 = last_adj_pkg.data.ap_member_array(weight_t, data, 10);
+                    last_adj_v_11 = last_adj_pkg.data.ap_member_array(weight_t, data, 11);
+                    last_adj_v_12 = last_adj_pkg.data.ap_member_array(weight_t, data, 12);
+                    last_adj_v_13 = last_adj_pkg.data.ap_member_array(weight_t, data, 13);
+                    last_adj_v_14 = last_adj_pkg.data.ap_member_array(weight_t, data, 14);
+                    last_adj_v_15 = last_adj_pkg.data.ap_member_array(weight_t, data, 15);
+
+
+                    last_adj_v_flag = 1;
+                }
+            }
+
+            uint8_t    equal_mask[NUM_OF_WEIGHTS];
+#pragma HLS ARRAY_PARTITION variable=equal_mask           dim=0
+
+            ap_uint<16>  mask;
+
+            if ((last_adj_v_flag == 1) && (curr_adj_v_flag == 1))
+            {
+                if (last_adj_v_0  == curr_adj_v) {equal_mask[0 ] = 1; } else {equal_mask[0 ] = 0;}
+                if (last_adj_v_1  == curr_adj_v) {equal_mask[1 ] = 1; } else {equal_mask[1 ] = 0;}
+                if (last_adj_v_2  == curr_adj_v) {equal_mask[2 ] = 1; } else {equal_mask[2 ] = 0;}
+                if (last_adj_v_3  == curr_adj_v) {equal_mask[3 ] = 1; } else {equal_mask[3 ] = 0;}
+                if (last_adj_v_4  == curr_adj_v) {equal_mask[4 ] = 1; } else {equal_mask[4 ] = 0;}
+                if (last_adj_v_5  == curr_adj_v) {equal_mask[5 ] = 1; } else {equal_mask[5 ] = 0;}
+                if (last_adj_v_6  == curr_adj_v) {equal_mask[6 ] = 1; } else {equal_mask[6 ] = 0;}
+                if (last_adj_v_7  == curr_adj_v) {equal_mask[7 ] = 1; } else {equal_mask[7 ] = 0;}
+                if (last_adj_v_8  == curr_adj_v) {equal_mask[8 ] = 1; } else {equal_mask[8 ] = 0;}
+                if (last_adj_v_9  == curr_adj_v) {equal_mask[9 ] = 1; } else {equal_mask[9 ] = 0;}
+                if (last_adj_v_10 == curr_adj_v) {equal_mask[10] = 1; } else {equal_mask[10] = 0;}
+                if (last_adj_v_11 == curr_adj_v) {equal_mask[11] = 1; } else {equal_mask[11] = 0;}
+                if (last_adj_v_12 == curr_adj_v) {equal_mask[12] = 1; } else {equal_mask[12] = 0;}
+                if (last_adj_v_13 == curr_adj_v) {equal_mask[13] = 1; } else {equal_mask[13] = 0;}
+                if (last_adj_v_14 == curr_adj_v) {equal_mask[14] = 1; } else {equal_mask[14] = 0;}
+                if (last_adj_v_15 == curr_adj_v) {equal_mask[15] = 1; } else {equal_mask[15] = 0;}
+
+                //ap_uint<16>  cll_reduced_mask;
+reduce_equal: for (uint32_t i = 0; i < NUM_OF_WEIGHTS ; i++) {
+#pragma HLS UNROLL
+                    mask.range(i, i) = equal_mask[i] & 0x01;
+                    //    cll_reduced_mask.range(i, i) = cll_mask[i] & 0x01;
+                }
+            }
+            else
+            {
+                mask = 0x0000;
+            }
+
+
+            switch (update_state)
+            {
+            case STATS_SAME:
+            {
+                out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_SET;
+                out.write(out_pkg);
+
+                if ((curr_adj_v_end == 0) && (last_adj_v_end == 0))
+                {
+                    update_state = STATS_READ_CURR_UPDATE;
+                    curr_adj_v_flag = 0;
+                    if (last_adj_v_15 == curr_adj_v)
+                        last_adj_v_flag = 0;
+                    else
+                        last_adj_v_flag = 1;
+                }
+                else if ((curr_adj_v_end == 0) && (last_adj_v_end == 1))
+                {
+                    update_state = STATS_READ_LAST_END;
+                    curr_adj_v_flag = 0;
+                    last_adj_v_flag = 1;
+                }
+                else if ((curr_adj_v_end == 1) && (last_adj_v_end == 0))
+                {
+                    update_state = STATS_READ_CURR_END;
+                    curr_adj_v_flag = 1;
+                    last_adj_v_flag = 0;
+                }
+                else if ((curr_adj_v_end == 1) && (last_adj_v_end == 1))
+                {
+                    update_state = STATS_READ_CURR_UPDATE;
+                    curr_adj_v_flag = 0;
+                    last_adj_v_flag = 0;
+                    curr_adj_v_end = 0;
+                    last_adj_v_end = 0;
+                }
+                break;
+            }
+            case STATS_SMALL:
+            {
+                out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_UNSET;
+                out.write(out_pkg);
+
+                if ((curr_adj_v_end == 0) && (last_adj_v_end == 0))
+                {
+                    update_state = STATS_READ_CURR_UPDATE;
+                    curr_adj_v_flag = 0;
+                    last_adj_v_flag = 1;
+                }
+                else if ((curr_adj_v_end == 0) && (last_adj_v_end == 1))
+                {
+                    update_state = STATS_READ_LAST_END;
+                    curr_adj_v_flag = 0;
+                    last_adj_v_flag = 1;
+                }
+                else if ((curr_adj_v_end == 1) && (last_adj_v_end == 0))
+                {
+                    update_state = STATS_READ_CURR_END;
+                    curr_adj_v_flag = 1;
+                    last_adj_v_flag = 0;
+                }
+                else if ((curr_adj_v_end == 1) && (last_adj_v_end == 1))
+                {
+                    update_state = STATS_READ_CURR_UPDATE;
+                    curr_adj_v_flag = 0;
+                    last_adj_v_flag = 0;
+                    curr_adj_v_end = 0;
+                    last_adj_v_end = 0;
+                }
+                break;
+            }
+            case STATS_LARGE:
+            {
+                if ((curr_adj_v_end == 0) && (last_adj_v_end == 0))
+                {
+                    update_state = STATS_READ_CURR_UPDATE;
+                    curr_adj_v_flag = 1;
+                    last_adj_v_flag = 0;
+                }
+                else if ((curr_adj_v_end == 0) && (last_adj_v_end == 1))
+                {
+                    out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_UNSET;
+                    out.write(out_pkg);
+                    update_state = STATS_READ_LAST_END;
+                    curr_adj_v_flag = 0;
+                    last_adj_v_flag = 1;
+                }
+                else if ((curr_adj_v_end == 1) && (last_adj_v_end == 0))
+                {
+                    update_state = STATS_READ_CURR_END_2;
+                    curr_adj_v_flag = 1;
+                    last_adj_v_flag = 0;
+                }
+                else if ((curr_adj_v_end == 1) && (last_adj_v_end == 1))
+                {
+                    out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_UNSET;
+                    out.write(out_pkg);
+                    update_state = STATS_READ_CURR_UPDATE;
+                    curr_adj_v_flag = 0;
+                    last_adj_v_flag = 0;
+                    curr_adj_v_end = 0;
+                    last_adj_v_end = 0;
+                }
+                break;
+            }
+            case STATS_READ_CURR_UPDATE:
+            {
+                //adjacent_pkg_t base = curr_adj_in.read();
+                if ((curr_adj_v_flag == 1) && (last_adj_v_flag == 1))
+                {
+                    //curr_adj_v = curr_adj_v_read;
+
+                    if (mask != 0)      // both need load new one
+                    {
+                        update_state = STATS_SAME;
+                    }
+                    else if (curr_adj_v < last_adj_v_15 )            // curr_adj_v needs load new one
+                    {
+
+                        update_state = STATS_SMALL;
+                    }
+                    else
+                    {
+                        update_state = STATS_LARGE;
+                    }
+                }
+                break;
+            }
+            case STATS_READ_CURR_END:
+            {
+                if ((last_adj_v_flag == 1) && (last_adj_v_end == 0))
+                {
+                    curr_adj_v_flag = 1;
+                    last_adj_v_flag = 0;
+                }
+                else if ((last_adj_v_flag == 1) && (last_adj_v_end == 1))
+                {
+                    update_state = STATS_CLEAR;
+                }
+                break;
+            }
+
+
+            case STATS_READ_CURR_END_2:
+            {
+                if ((last_adj_v_flag == 1) && (last_adj_v_end == 0))
+                {
+
+                    if (mask > 0)
+                    {
+                        final_current = 1;
+                    }
+                    curr_adj_v_flag = 1;
+                    last_adj_v_flag = 0;
+                }
+                else if ((last_adj_v_flag == 1) && (last_adj_v_end == 1))
+                {
+                    if (final_current)
+                        out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_SET;
+                    else
+                        out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_UNSET;
+                    out.write(out_pkg);
+                    update_state = STATS_CLEAR;
+                }
+
+                break;
+            }
+            case STATS_READ_LAST_END:
+            {
+                if ((curr_adj_v_flag == 1) && (curr_adj_v_end == 0))
+                {
+                    last_adj_v_flag = 1;
+                    curr_adj_v_flag = 0;
+                    if (mask > 0)
+                        out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_SET;
+                    else
+                        out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_UNSET;
+
+                    out.write(out_pkg);
+                }
+                else if ((curr_adj_v_flag == 1) && (curr_adj_v_end == 1))
+                {
+                    if (mask > 0)
+                        out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_SET;
+                    else
+                        out_pkg.data.ap_member(adjacent_t, v) = NEIGHBOR_UNSET;
+
+                    out.write(out_pkg);
+                    update_state = STATS_CLEAR;
+                }
+                break;
+            }
+            case STATS_CLEAR:
+            {
+                curr_adj_v_flag = 0;
+                last_adj_v_flag = 0;
+                curr_adj_v_end = 0;
+                last_adj_v_end = 0;
+                update_state = STATS_READ_CURR_UPDATE;
+                break;
+            }
+
+            }
+
+        }
+    }
+}
