@@ -1,4 +1,4 @@
 [submodule "mk"]
 	path = mk
-	url = git@github.com:HongshiTan/rabs.git
+	url = https://github.com/HongshiTan/rabs
 	branch = main
