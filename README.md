@@ -155,7 +155,7 @@ The repository is structured as follows:
 To set the necessary environment variables for build and execution, run the following commands:
 ```bash
 source /opt/xilinx/xrt/setup.sh
-source /tools/Vitis/2021.2/settings64.sh
+source /tools/Xilinx/Vitis/2021.2/settings64.sh
 ```
 
 
