@@ -150,6 +150,15 @@ The repository is structured as follows:
 └── mk         # Contains the RABS submodule for building the accelerator.
 ```
 
+#### Setting XRT and Vitis environment variables 
+
+To set the necessary environment variables for build and execution, run the following commands:
+```bash
+source /opt/xilinx/xrt/setup.sh
+source /tools/Vitis/2021.2/settings64.sh
+```
+
+
 #### Building LightRW
 
 To build LightRW, use the `make` command as shown below. Replace `${app_name}` with the name of the application in the `app` directory:
@@ -263,13 +272,13 @@ This output displays the elapsed time of accelerator initialization, data transf
 We provide a script to run the throughput test on all graphs in the `misc` directory:
 
 ```bash
-./misc  ${app_name} ${path_to_all_graphs}
+./misc/rw_test.sh  ${app_name} ${path_to_all_graphs}
 ```
 
 Ensure all graphs have been downloaded in `${path_to_all_graphs}`. The `${app_name}` is the same as the input used during the build process. For example:
 
 ```bash
-./misc  metapath_x4 /data/graphs/
+./misc/rw_test.sh  metapath_x4 /data/graphs/
 ```
 
 The script will generate a log directory with a timestamp (e.g.,`${log_2023_08_02_11_40_59}`), and all execution logs will be stored in this directory.
