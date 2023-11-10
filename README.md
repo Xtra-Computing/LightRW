@@ -170,7 +170,7 @@ Here's a quick guide to the arguments:
 For example, to build a full implementation of the MetaPath random walk accelerator, use:
 
 ```bash
-make app=metadata_x4 TARGET=hw all 
+make app=metapath_x4 TARGET=hw all 
 ```
 
 To build a full implementation of the Node2Vec random walk accelerator, use:
@@ -302,4 +302,4 @@ numpages = {27},
 
 This repository is a prototype for an accelerator, and we are actively working on extending its support to more FPGA platforms and large graph workloads. We are committed to keeping this repository updated in sync with our development repositories.
 
-We appreciate your interest and encourage you to share your experiences and issues while using this repository. Please feel free to submit issues directly on this platform. For more specific concerns or queries, you can reach out to Hongshi Tan via email at hongshan@u.nus.edu. We look forward to hearing from you and improving our work based on your valuable feedback.
+We appreciate your interest and encourage you to share your experiences and issues while using this repository. Please feel free to submit issues directly on this platform. For more specific concerns or queries, you can reach out to Hongshi Tan via email at hongshi@u.nus.edu. We look forward to hearing from you and improving our work based on your valuable feedback.
