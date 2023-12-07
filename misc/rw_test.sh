@@ -15,7 +15,7 @@ app=$1
 if [ $# -lt 2 ];
   then
     echo "Use default path of datasets: /data/graph_at_scale/dataset"
-    dataset_path="/data/graph_at_scale/dataset"
+    dataset_path="/data/graph_at_scale/"
 else
     dataset_path=$2
 fi
@@ -24,6 +24,7 @@ fi
 DATASET=(   'amazon' \
             'youtube' \
             'patents' \
+            'livejournal' \
             'orkut' \
             'uk2002' \
 )
@@ -48,6 +49,6 @@ mkdir -p ${log_dir}
 for dataset  in "${DATASET[@]}"
 do
     echo "$dataset"
-    #__run  $app $dataset_path  ${dataset} ${log_dir}
+    __run  $app $dataset_path  ${dataset} ${log_dir}
 
 done
